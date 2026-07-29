@@ -1,491 +1,493 @@
-Spring Boot Design Patterns – Senior/Lead Java Reviewer
+---
 
-This reviewer focuses on patterns you will actually encounter in Spring Boot applications, especially in interviews and enterprise systems.
+Spring Boot Design Patterns
+
+A Practical Guide for Java Backend Developers
 
 
 ---
 
-1. What is a Design Pattern?
+1. Dependency Injection (DI)
 
-A design pattern is a proven solution to a recurring software problem.
+What is it?
 
-It is not code.
+Dependency Injection is a design pattern where an object's dependencies are provided from the outside instead of the object creating them itself.
 
-It is a way of organizing code.
-
-Example:
-
-Instead of creating objects manually everywhere:
-
-UserService service = new UserService();
-
-Spring manages it.
-
-@Autowired
-private UserService service;
-
-This is because Spring heavily uses the Dependency Injection pattern.
+In Spring Boot, the IoC (Inversion of Control) Container creates and manages objects (Beans) and injects them where needed.
 
 
 ---
 
-Spring Boot uses dozens of design patterns internally.
-
-The important ones are:
-
-1. Dependency Injection (IoC)
-
-
-2. Singleton
-
-
-3. Factory
-
-
-4. Builder
-
-
-5. Proxy
-
-
-6. Strategy
-
-
-7. Template Method
-
-
-8. Observer (Event Driven)
-
-
-9. Repository
-
-
-10. MVC
-
-
-11. Adapter
-
-
-12. Decorator
-
-
-13. Facade
-
-
-14. Command
-
-
-15. Chain of Responsibility
-
-
-
-Master these and you'll understand almost every Spring Boot project.
-
-
----
-
-2. Dependency Injection (Most Important)
-
-Problem
+The Problem
 
 Without DI:
 
 public class UserController {
 
-    private UserService service = new UserService();
+    private UserService userService = new UserService();
 
 }
 
 Problems:
 
-tightly coupled
+Tight coupling
 
-impossible to mock
+Hard to test
 
-difficult testing
+Cannot easily replace implementations
 
-hard replacement
+Violates SOLID (Dependency Inversion)
 
 
 
 ---
 
-With DI
+Spring Solution
 
 @RestController
 public class UserController {
 
-    private final UserService service;
-
-    public UserController(UserService service){
-        this.service = service;
-    }
-}
-
-Spring injects it.
-
-You never instantiate it.
-
-
----
-
-Why?
-
-Because Spring Container manages every bean.
-
-Spring Container
-
-   creates UserService
-
-           ↓
-
-injects into
-
-UserController
-
-
----
-
-Constructor Injection (Recommended)
-
-@Service
-public class UserService{
-
-}
-
-@RestController
-public class UserController{
-
     private final UserService userService;
 
-    public UserController(UserService userService){
+    public UserController(UserService userService) {
         this.userService = userService;
     }
+}
+
+Spring automatically injects the UserService.
+
+
+---
+
+Real World Example
+
+Imagine building a restaurant.
+
+Without DI:
+
+The chef personally buys vegetables every morning.
+
+With DI:
+
+The supplier delivers fresh ingredients every day.
+
+The chef only cooks.
+
+The chef doesn't care where the ingredients came from.
+
+
+---
+
+Spring Boot Examples
+
+@Service
+
+@Repository
+
+@Controller
+
+Constructor Injection
+
+@Autowired
+
+
+
+---
+
+When to Use
+
+Always.
+
+Almost every Spring Boot application relies on DI.
+
+
+---
+
+Interview Takeaway
+
+> Constructor Injection is preferred because it creates immutable dependencies, improves testability, and clearly defines required dependencies.
+
+
+
+
+---
+
+2. Singleton Pattern
+
+What is it?
+
+Only one instance of an object exists throughout the application.
+
+This is Spring's default bean scope.
+
+
+---
+
+Spring Example
+
+@Service
+public class UserService {
 
 }
 
-Advantages
+Only one UserService object is created.
 
-immutable
+Every controller shares it.
 
-easier testing
 
-no nulls
+---
 
-official recommendation
+Real World Example
+
+A company's HR department.
+
+There is only one HR office.
+
+Everyone goes to the same office.
+
+You don't build a new HR office every time an employee has a question.
+
+
+---
+
+Benefits
+
+Saves memory
+
+Faster object reuse
+
+Easy dependency sharing
 
 
 
 ---
 
-Interview Question
+Be Careful
 
-Why constructor injection over field injection?
+Singleton beans must be stateless.
 
-Answer:
+Avoid storing request-specific data.
 
-immutable dependency
+❌ Bad
 
-unit testing
+private User currentUser;
 
-dependency explicitly declared
+✔ Good
 
-easier maintenance
-
-no reflection
-
+public User findUser(Long id)
 
 
 ---
 
-3. Singleton Pattern
+Interview Takeaway
 
-One object.
-
-One instance.
-
-Entire application.
-
-Spring beans are Singleton by default.
-
-@Bean
-
-↓
-
-created once
-
-↓
-
-shared everywhere
-
-Example
-
-@Service
-public class UserService{
-
-}
-
-This object exists only once.
-
-Every controller receives the same instance.
+Spring Beans are Singleton by default.
 
 
 ---
 
-Changing scope
+3. Factory Pattern
 
-@Scope("prototype")
-@Service
+What is it?
 
-Now Spring creates a new instance every request.
-
-
----
-
-Interview
-
-Default bean scope?
-
-Answer:
-
-Singleton.
+A Factory creates objects for you instead of you creating them manually.
 
 
 ---
 
-4. Factory Pattern
+Without Factory
 
-Instead of using
+UserService service = new UserService();
 
-new UserService();
 
-The factory creates it.
+---
 
-Spring itself is a gigantic Factory.
-
-Example
-
-ApplicationContext context;
+With Spring
 
 UserService service =
 context.getBean(UserService.class);
 
-You never construct objects manually.
-
-The ApplicationContext acts as the Factory.
+Spring creates it.
 
 
 ---
 
-Another example
+Real World Example
+
+Buying a car.
+
+You don't manufacture it yourself.
+
+The factory does.
+
+You simply request one.
+
+
+---
+
+Spring Examples
 
 @Bean
-public PasswordEncoder encoder(){
-
+PasswordEncoder passwordEncoder() {
     return new BCryptPasswordEncoder();
-
 }
 
-Spring calls this method.
-
-Not you.
+Spring decides when to create it.
 
 
 ---
 
-5. Builder Pattern
+Benefits
 
-Used for complex object creation.
+Centralized object creation
+
+Easier maintenance
+
+Loose coupling
+
+
+
+---
+
+Interview Takeaway
+
+The ApplicationContext is essentially a massive Factory.
+
+
+---
+
+4. Builder Pattern
+
+What is it?
+
+Builder simplifies creating complex objects with many optional fields.
+
+
+---
 
 Instead of
 
-User u = new User();
+User user = new User();
 
-u.setName("John");
-u.setAge(25);
-u.setAddress(...);
-u.setPhone(...);
+user.setName("John");
+user.setAge(25);
+user.setAddress("Manila");
 
-Builder
+Use
 
 User.builder()
     .name("John")
     .age(25)
-    .address(...)
+    .address("Manila")
     .build();
-
-Much cleaner.
 
 
 ---
 
-Lombok
+Real World Example
 
-@Builder
-public class User{
+Ordering coffee.
 
-}
+Choose:
 
-Spring developers use Builder constantly.
+Size
 
-Especially
+Milk
+
+Sugar
+
+Syrup
+
+Ice
+
+
+Instead of having dozens of constructors.
+
+
+---
+
+Spring Usage
+
+Mostly with
 
 DTOs
 
-Responses
+Response Objects
+
+Configuration Objects
 
 Entities
 
-Configurations
 
 
 ---
 
-Interview
+Benefits
 
-Advantages
+Readable
 
-immutable objects
+Immutable
 
-readable
-
-avoids telescoping constructors
+Cleaner code
 
 
 
 ---
 
-6. Strategy Pattern
+Interview Takeaway
 
-Probably the second most common.
+Builder eliminates telescoping constructors and improves readability.
+
+
+---
+
+5. Strategy Pattern
+
+What is it?
+
+A Strategy allows multiple algorithms to implement the same interface.
+
+The application chooses which one to use at runtime.
+
+
+---
 
 Problem
 
-Different payment methods.
-
 Instead of
 
-if(type.equals("GCASH")){
+if(payment.equals("GCASH")){
 
 }
-else if(type.equals("CARD")){
-
-}
-else if(type.equals("PAYPAL")){
+else if(payment.equals("CARD")){
 
 }
 
-Use strategies.
+Create strategies.
 
-Interface
-
-public interface PaymentStrategy{
+public interface PaymentStrategy {
 
     void pay();
 
 }
 
-GCash
+@Service
+class GCashPayment implements PaymentStrategy
 
 @Service
-public class GCashPayment
-implements PaymentStrategy{
+class CardPayment implements PaymentStrategy
+
+
+---
+
+Real World Example
+
+Google Maps.
+
+You choose:
+
+Drive
+
+Walk
+
+Bike
+
+Public Transport
+
+
+Same destination.
+
+Different strategy.
+
+
+---
+
+Spring Examples
+
+PasswordEncoder
+
+AuthenticationProvider
+
+Payment Gateway
+
+Notification Services
+
+
+
+---
+
+Benefits
+
+No giant if-else blocks
+
+Easy extension
+
+Open/Closed Principle
+
+
+
+---
+
+Interview Takeaway
+
+Strategy lets you add new behaviors without modifying existing code.
+
+
+---
+
+6. Proxy Pattern
+
+What is it?
+
+A Proxy sits between the caller and the real object.
+
+It performs extra work before or after calling the real method.
+
+
+---
+
+Spring Example
+
+@Transactional
+public void saveOrder() {
 
 }
 
-Card
+What actually happens:
 
-@Service
-public class CardPayment
-implements PaymentStrategy{
+Client
 
-}
+↓
 
-Usage
+Spring Proxy
 
-strategy.pay();
+↓
 
-No if statements.
+Start Transaction
+
+↓
+
+Execute Method
+
+↓
+
+Commit/Rollback
 
 
 ---
 
-Real Spring Example
+Real World Example
 
-Authentication Providers
+A receptionist.
 
-Password Encoders
+Visitors don't enter the CEO's office directly.
 
-Message Converters
-
-Validation
-
-Serialization
+The receptionist checks appointments first.
 
 
 ---
 
-Interview
-
-Why Strategy?
-
-Open/Closed Principle.
-
-New payment?
-
-Just add another implementation.
-
-No existing code changes.
-
-
----
-
-7. Proxy Pattern
-
-Spring AOP is built on Proxy.
-
-Suppose
-
-userService.save();
-
-Looks simple.
-
-Actually
-
-Controller
-
-↓
-
-Proxy
-
-↓
-
-Transaction
-
-↓
-
-Security
-
-↓
-
-Logging
-
-↓
-
-Caching
-
-↓
-
-Real Method
-
-You are calling the proxy.
-
-Not the real object.
-
-
----
-
-Annotations using Proxy
+Spring Features Using Proxy
 
 @Transactional
 
@@ -493,70 +495,72 @@ Annotations using Proxy
 
 @Async
 
-@Secured
-
 @PreAuthorize
 
-All Proxy based.
 
 
 ---
 
-Interview
+Interview Takeaway
 
-How does @Transactional work?
-
-Spring creates a Proxy.
-
-The proxy starts transaction before method.
-
-Calls actual method.
-
-Commits.
-
-Rolls back if exception.
+Most Spring AOP features are implemented using Proxies.
 
 
 ---
 
-8. Template Method Pattern
+7. Template Method Pattern
 
-Spring's JdbcTemplate.
+What is it?
 
-Without
+The framework handles repetitive steps while you provide only the custom logic.
 
-Connection
 
-PreparedStatement
+---
 
-ResultSet
+Without JdbcTemplate
 
-finally
+Open Connection
 
-close()
+Create Statement
 
-catch
+Execute Query
 
-Hundreds of lines.
+Read Result
 
-With
+Close Resources
+
+With JdbcTemplate
 
 jdbcTemplate.query(...)
 
-Spring handles boilerplate.
 
-You provide only
+---
 
-SQL
+Real World Example
 
-Mapper
+A washing machine.
 
-Done.
+You press "Start."
+
+The machine handles:
+
+Fill water
+
+Wash
+
+Rinse
+
+Spin
+
+
+You only choose the program.
 
 
 ---
 
-Other examples
+Spring Examples
+
+JdbcTemplate
 
 RestTemplate
 
@@ -564,118 +568,168 @@ RedisTemplate
 
 KafkaTemplate
 
-MongoTemplate
 
 
 ---
-
-Interview
-
-Why Template?
-
-Removes duplicated boilerplate.
-
-
----
-
-9. Observer Pattern
-
-Spring Events.
-
-Publisher
-
-publisher.publishEvent(new UserCreatedEvent(user));
-
-Listener
-
-@Component
-public class UserListener{
-
-    @EventListener
-    public void handle(UserCreatedEvent event){
-
-    }
-
-}
-
-Publisher doesn't know listener.
-
-Loose coupling.
-
-
----
-
-Use Cases
-
-Email
-
-SMS
-
-Audit
-
-Notifications
-
-Analytics
-
-Logging
-
-
----
-
-Interview
-
-Difference between Observer and Strategy?
-
-Strategy
-
-Choose one behavior.
-
-Observer
-
-Notify many listeners.
-
-
----
-
-10. Repository Pattern
-
-Hide persistence logic.
-
-Instead of
-
-entityManager.persist(...)
-
-Simply
-
-interface UserRepository
-extends JpaRepository<User,Long>{}
-
-Spring generates implementation.
-
-Amazing.
-
-
----
-
-Interview
 
 Benefits
 
-abstraction
+Removes repetitive boilerplate code.
 
-testing
 
-cleaner services
+---
 
-separation of concerns
+Interview Takeaway
+
+Template Method standardizes common workflows while allowing customization.
+
+
+---
+
+8. Observer Pattern
+
+What is it?
+
+One object publishes an event.
+
+Multiple listeners react independently.
+
+
+---
+
+Publisher
+
+publisher.publishEvent(
+    new UserCreatedEvent(user)
+);
+
+Listener
+
+@EventListener
+public void handle(UserCreatedEvent event){
+
+}
+
+
+---
+
+Real World Example
+
+You subscribe to a YouTube channel.
+
+Whenever a new video is uploaded,
+
+You receive a notification.
+
+The creator doesn't know who is watching.
+
+
+---
+
+Spring Examples
+
+Email Notifications
+
+Audit Logs
+
+Analytics
+
+SMS
+
+Activity Tracking
 
 
 
 ---
 
-11. MVC Pattern
+Benefits
 
-Spring MVC
+Loose coupling.
+
+Publisher doesn't know who receives the event.
+
+
+---
+
+Interview Takeaway
+
+Observer enables event-driven architecture.
+
+
+---
+
+9. Repository Pattern
+
+What is it?
+
+The Repository hides database operations behind a simple interface.
+
+
+---
+
+Instead of writing SQL everywhere
+
+entityManager.persist(user);
+
+Simply write
+
+interface UserRepository
+extends JpaRepository<User, Long> {
+
+}
+
+
+---
+
+Real World Example
+
+A librarian.
+
+You ask for a book.
+
+The librarian knows where it is.
+
+You don't search the shelves yourself.
+
+
+---
+
+Spring Examples
+
+JpaRepository
+
+CrudRepository
+
+MongoRepository
+
+
+
+---
+
+Benefits
+
+Cleaner Service Layer
+
+Easier Testing
+
+Database abstraction
+
+
+
+---
+
+Interview Takeaway
+
+Repository separates business logic from persistence logic.
+
+
+---
+
+10. MVC Pattern
+
+What is it?
+
+Separates application responsibilities into three layers.
 
 Client
 
@@ -695,83 +749,127 @@ Repository
 
 Database
 
+
+---
+
+Responsibilities
+
 Controller
 
-Handles HTTP.
+Receives HTTP requests.
 
 Service
 
-Business Logic.
+Contains business rules.
 
 Repository
 
-Database.
+Handles database access.
 
 
 ---
 
-Example
+Real World Example
 
-GET /users
+Restaurant.
 
-↓
+Waiter → Controller
 
-UserController
+Chef → Service
 
-↓
-
-UserService
-
-↓
-
-UserRepository
-
-↓
-
-MySQL
+Pantry → Repository
 
 
 ---
 
-Interview
+Benefits
 
-Never put business logic inside Controller.
+Clean architecture
+
+Easier maintenance
+
+Better testing
+
 
 
 ---
 
-12. Adapter Pattern
+Interview Takeaway
 
-Convert incompatible interfaces.
+Controllers should be thin. Business logic belongs in Services.
 
-Example
 
-PaymentGatewayA
+---
 
-↓
+11. Adapter Pattern
 
-Adapter
+What is it?
 
-↓
+Converts one interface into another so incompatible systems can work together.
 
-Your Payment Interface
+
+---
+
+Real World Example
+
+A travel adapter.
+
+Your laptop charger doesn't fit a foreign outlet.
+
+The adapter makes them compatible.
+
+
+---
 
 Spring Examples
 
-HttpMessageConverter
-
 HandlerAdapter
 
-WebMvcConfigurer
+HttpMessageConverter
+
+Third-party API integration
+
 
 
 ---
 
-13. Decorator Pattern
+Interview Takeaway
 
-Add behavior without changing code.
+Adapters allow existing code to work without modification.
 
-Example
+
+---
+
+12. Decorator Pattern
+
+What is it?
+
+Adds new functionality to an object without changing its original implementation.
+
+
+---
+
+Real World Example
+
+Coffee.
+
+Start with plain coffee.
+
+Add:
+
+Milk
+
+Chocolate
+
+Caramel
+
+
+Each topping decorates the same coffee.
+
+
+---
+
+Java Example
 
 InputStream
 
@@ -783,78 +881,158 @@ BufferedInputStream
 
 DataInputStream
 
-Each wraps another.
 
-Spring Security Filters also decorate requests.
+---
+
+Spring Usage
+
+Security filters
+
+Request wrappers
+
+Response wrappers
 
 
 ---
 
-14. Facade Pattern
+Interview Takeaway
 
-Provide one simple interface.
+Decorator extends behavior dynamically without inheritance.
 
-Instead of
+
+---
+
+13. Facade Pattern
+
+What is it?
+
+Provides one simple interface over multiple complex subsystems.
+
+
+---
+
+Instead of calling
 
 Payment
 
 Inventory
 
-Email
-
 Shipping
 
 Invoice
 
-Client calls
+Email
 
-OrderFacade.placeOrder();
 
-Facade handles everything.
+Call
 
-Very common in microservices.
+orderFacade.placeOrder();
 
 
 ---
 
-15. Command Pattern
+Real World Example
 
-Encapsulate request.
+Hotel Reception.
 
-Example
+Instead of talking to housekeeping, billing, and room service separately,
+
+You call the front desk.
+
+
+---
+
+Benefits
+
+Simplifies APIs
+
+Reduces client complexity
+
+
+
+---
+
+Interview Takeaway
+
+Facade hides complexity behind one easy-to-use interface.
+
+
+---
+
+14. Command Pattern
+
+What is it?
+
+Encapsulates a request as an object.
+
+
+---
+
+Examples
 
 CreateUserCommand
 
 DeleteUserCommand
 
-UpdateUserCommand
+RefundOrderCommand
 
-Each command executes independently.
 
-Useful
+---
 
-Queues
+Real World Example
 
-Kafka
+Restaurant order ticket.
+
+The waiter writes your order.
+
+The kitchen executes it later.
+
+
+---
+
+Spring Usage
+
+Kafka messages
 
 RabbitMQ
 
 CQRS
 
+Job Queues
+
+
 
 ---
 
-16. Chain of Responsibility
+Interview Takeaway
 
-Huge Spring Security topic.
+Commands make requests reusable, queueable, and auditable.
 
-Incoming request
 
-JWT Filter
+---
+
+15. Chain of Responsibility
+
+What is it?
+
+A request passes through multiple handlers.
+
+Each handler decides whether to process it or pass it along.
+
+
+---
+
+Spring Security
+
+Incoming Request
 
 ↓
 
-Cors Filter
+CORS Filter
+
+↓
+
+JWT Filter
 
 ↓
 
@@ -866,237 +1044,90 @@ Authorization Filter
 
 ↓
 
-Exception Filter
+Controller
+
+
+---
+
+Real World Example
+
+Airport Security.
+
+Passport Check
 
 ↓
 
-Controller
+Security Scan
 
-Each filter decides
+↓
 
-Handle
+Immigration
 
-or
+↓
 
-Pass to next.
+Boarding Gate
 
-Exactly Chain of Responsibility.
+Each station performs its task before allowing you to proceed.
 
 
 ---
 
-Pattern Mapping Inside Spring Boot
+Benefits
 
-Spring Feature	Pattern
+Flexible processing pipeline
 
-@Autowired	Dependency Injection
-@Service	Singleton
-ApplicationContext	Factory
-@Builder (Lombok)	Builder
-@Transactional	Proxy
-JdbcTemplate	Template Method
-ApplicationEventPublisher	Observer
-JpaRepository	Repository
-Spring MVC	MVC
-HandlerAdapter	Adapter
-Security Filter Chain	Chain of Responsibility
-PasswordEncoder implementations	Strategy
-InputStream wrappers	Decorator
-Service Facades	Facade
+Easy to add or remove handlers
 
 
 
 ---
 
-SOLID Principles in Spring Boot
+Interview Takeaway
 
-Every design pattern works best when guided by SOLID.
-
-S — Single Responsibility Principle (SRP)
-
-Each class should have one reason to change.
-
-// Good
-@Service
-public class UserService {
-    public User create(UserDto dto) { ... }
-}
-
-@Component
-public class EmailService {
-    public void sendWelcomeEmail(User user) { ... }
-}
-
-Avoid mixing business logic, persistence, email, and validation in one class.
+Spring Security's Filter Chain is the most common example of the Chain of Responsibility pattern.
 
 
 ---
 
-O — Open/Closed Principle (OCP)
+Quick Interview Cheat Sheet
 
-Open for extension, closed for modification.
+Pattern	Spring Boot Example	Real-World Example
 
-The Strategy Pattern is the classic example.
-
-public interface PaymentStrategy {
-    void pay();
-}
-
-@Service
-public class CardPayment implements PaymentStrategy { ... }
-
-@Service
-public class GCashPayment implements PaymentStrategy { ... }
-
-Adding a new payment method should not require changing existing implementations.
-
-
----
-
-L — Liskov Substitution Principle (LSP)
-
-Subtypes should be interchangeable with their parent type.
-
-PaymentStrategy strategy = new CardPayment();
-strategy.pay();
-
-The caller should not care which implementation is used.
-
-
----
-
-I — Interface Segregation Principle (ISP)
-
-Prefer small, focused interfaces.
-
-public interface EmailSender {
-    void sendEmail(...);
-}
-
-public interface SmsSender {
-    void sendSms(...);
-}
-
-Avoid large "god interfaces" that force implementations to provide unused methods.
-
-
----
-
-D — Dependency Inversion Principle (DIP)
-
-Depend on abstractions, not concrete implementations.
-
-@Service
-public class CheckoutService {
-
-    private final PaymentStrategy paymentStrategy;
-
-    public CheckoutService(PaymentStrategy paymentStrategy) {
-        this.paymentStrategy = paymentStrategy;
-    }
-}
-
-CheckoutService depends on the PaymentStrategy interface rather than a specific payment class, making it easy to swap implementations and test with mocks.
-
-
----
-
-Senior Interview Questions
-
-Explain IoC and DI.
-
-Answer: Inversion of Control means the framework controls object creation and lifecycle. Dependency Injection is the mechanism Spring uses to provide required dependencies to those managed objects.
-
-
----
-
-Why is constructor injection preferred?
-
-Makes dependencies explicit
-
-Supports immutable fields
-
-Easier unit testing
-
-Avoids reflection-based field injection
-
-Prevents partially initialized objects
+Dependency Injection	Constructor Injection	Chef receiving ingredients from a supplier
+Singleton	@Service Bean	One HR department
+Factory	ApplicationContext	Car factory
+Builder	Lombok @Builder	Custom coffee order
+Strategy	PasswordEncoder, Payment Service	Google Maps route selection
+Proxy	@Transactional, @Cacheable	Receptionist before the CEO
+Template Method	JdbcTemplate	Washing machine program
+Observer	ApplicationEventPublisher	YouTube subscribers
+Repository	JpaRepository	Librarian finding books
+MVC	Controller → Service → Repository	Restaurant waiter → chef → pantry
+Adapter	HandlerAdapter	Travel power adapter
+Decorator	BufferedInputStream	Coffee with toppings
+Facade	OrderFacade	Hotel front desk
+Command	Kafka/RabbitMQ messages	Restaurant order ticket
+Chain of Responsibility	Spring Security Filter Chain	Airport security checkpoints
 
 
 
 ---
 
-Why is @Transactional implemented using proxies?
+Final Tip for Senior Interviews
 
-Spring wraps the target bean with a proxy that begins a transaction before invoking the real method, then commits or rolls back based on the outcome. This keeps transaction management separate from business logic.
+Don't just memorize the definitions. For every pattern, be ready to answer these four questions:
 
-
----
-
-Explain Strategy with a real example.
-
-Different payment providers, notification channels, authentication mechanisms, or shipping calculators can implement a shared interface. The application chooses the appropriate implementation at runtime without changing client code.
+1. What problem does it solve?
 
 
----
+2. Where have you used it in Spring Boot?
 
-What design patterns are used by Spring Boot?
 
-A strong answer would include:
+3. Why is it better than a simpler approach?
 
-Dependency Injection (IoC)
 
-Singleton
-
-Factory
-
-Builder
-
-Strategy
-
-Proxy
-
-Template Method
-
-Observer
-
-Repository
-
-MVC
-
-Adapter
-
-Decorator
-
-Facade
-
-Command
-
-Chain of Responsibility
+4. What are its trade-offs or limitations?
 
 
 
----
-
-Senior-Level Tips
-
-For Lead or Senior interviews, don't just name the patterns—connect them to real Spring Boot features. For example:
-
-Dependency Injection: Constructor injection with @Service, @Repository, and @Controller.
-
-Strategy: Multiple PaymentStrategy or NotificationService implementations selected dynamically.
-
-Proxy: @Transactional, @Cacheable, @Async, and Spring Security method security.
-
-Chain of Responsibility: The Spring Security filter chain processing authentication and authorization.
-
-Observer: Domain events published with ApplicationEventPublisher and handled by @EventListener.
-
-Repository: JpaRepository abstracting persistence.
-
-Template Method: JdbcTemplate, RestTemplate, and other *Template classes that encapsulate boilerplate.
-
-Builder: Immutable DTOs and configuration objects with Lombok's @Builder.
-
-
-Being able to explain why Spring uses each pattern, what problem it solves, and where you've used it in production is what typically differentiates a Senior or Lead engineer from someone who has only memorized the definitions.
+Being able to discuss those points—and relate them to real production experience—is what interviewers typically look for in Senior and Lead Java developers.
